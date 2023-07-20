@@ -122,8 +122,8 @@ function script(res, url, type) {
             {
                 parsed_data.petrol.push({
                     "City": capital,
-                    "Today's Price": t_Price,
-                    "Yesterday's Price": y_Price
+                    "Today": t_Price,
+                    "Yesterday": y_Price
                 })    
             }
             
@@ -143,8 +143,8 @@ function script(res, url, type) {
             {
                 parsed_data.diesel.push({
                     "City": capital,
-                    "Today's Price": t_Price,
-                    "Yesterday's Price": y_Price
+                    "Today": t_Price,
+                    "Yesterday": y_Price
                 })    
             }
             
@@ -180,8 +180,8 @@ function fetcher(){
             {
                 parsed_data.petrol.push({
                     "City": capital,
-                    "Today's Price": t_Price,
-                    "Yesterday's Price": y_Price
+                    "Today": t_Price,
+                    "Yesterday": y_Price
                 })    
             }
             
@@ -202,8 +202,8 @@ function fetcher(){
             {
                 parsed_data.diesel.push({
                     "City": capital,
-                    "Today's Price": t_Price,
-                    "Yesterday's Price": y_Price
+                    "Today": t_Price,
+                    "Yesterday": y_Price
                 })    
             }
             
