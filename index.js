@@ -3,12 +3,22 @@ const express = require('express')
 const axios = require('axios')
 const cheerio = require('cheerio');
 
+
+const searchString = "finance";
+const encodedString = encodeURI(searchString);
+
+
+
+// /import './module-name'////
+// const gnews = require('gnews-scraper');
+
 const app = express();
 
 //Url For Web-Scrapping
 const petrol_urls = {
+    "BankHoliday_url": "https://www.bankbazaar.com/indian-holiday/bank-holidays.html",
     "Petrol_url": "https://www.goodreturns.in/petrol-price.html",
-    "Diesel_url":"https://www.goodreturns.in/diesel-price.html",
+    "Diesel_url": "https://www.goodreturns.in/diesel-price.html",
     "AN_url": "https://www.goodreturns.in/petrol-price-in-andaman-nicobar-s1.html",
     "AP_url": "https://www.goodreturns.in/petrol-price-in-andhra-pradesh-s2.html",
     "AR_url": "https://www.goodreturns.in/petrol-price-in-arunachal-pradesh-s3.html",
@@ -85,29 +95,29 @@ const lpg_urls = {
     "UK_url": "https://www.goodreturns.in/lpg-price-in-uttarakhand-s34.html",
     "WB_url": "https://www.goodreturns.in/lpg-price-in-west-bengal-s35.html"
 }
-
+//
 const parsed_data = []
 parsed_data.petrol = []
 parsed_data.diesel = []
+parsed_data.holidays = []
 
 //Main Script for parsing necessary data
 function script(res, url, type) {
-    
-   if(parsed_data.petrol.length>0 && parsed_data.diesel.length>0)
-   {
-    var data = {
-        
-        petrol: parsed_data.petrol,
-        diesel: parsed_data.diesel,
-    
-    };
-    res.json(data);
-    return
-   }  
 
-   console.log("Need to move ahed")
+    if (parsed_data.petrol.length > 0 && parsed_data.diesel.length > 0) {
+        var data = {
 
-        axios.get(url).then((response) => {
+            petrol: parsed_data.petrol,
+            diesel: parsed_data.diesel,
+
+        };
+        res.json(data);
+        return
+    }
+
+    console.log("Need to move ahed")
+
+    axios.get(url).then((response) => {
 
         const html = response.data
         const $ = cheerio.load(html)
@@ -118,108 +128,141 @@ function script(res, url, type) {
             const t_Price = $(this).find('td:nth-child(2)').text().replace(/\t|\n/gm, "");
             const y_Price = $(this).find('td:nth-child(3)').text().replace(/\t|\n/gm, "");
 
-            if(type === "petrol") 
-            {
+            if (type === "petrol") {
                 parsed_data.petrol.push({
                     "City": capital,
                     "Today": t_Price,
                     "Yesterday": y_Price
-                })    
+                })
             }
-            
+
         })
         axios.get(petrol_urls["Diesel_url"]).then((response) => {
             const html = response.data
             const $ = cheerio.load(html)
-        
 
 
-        $('.even_row, .odd_row', html).each(function () {
-            const capital = $(this).find('td:nth-child(1)').text();
-            const t_Price = $(this).find('td:nth-child(2)').text().replace(/\t|\n/gm, "");
-            const y_Price = $(this).find('td:nth-child(3)').text().replace(/\t|\n/gm, "");
-            let tip = "diesel"
-            if(tip=== "diesel") 
-            {
-                parsed_data.diesel.push({
-                    "City": capital,
-                    "Today": t_Price,
-                    "Yesterday": y_Price
-                })    
-            }
-            
-        })
-        var data = {
-        
-            petrol: parsed_data.petrol,
-            diesel: parsed_data.diesel,
-        
-        };
-        res.json(data);
+
+            $('.even_row, .odd_row', html).each(function () {
+                const capital = $(this).find('td:nth-child(1)').text();
+                const t_Price = $(this).find('td:nth-child(2)').text().replace(/\t|\n/gm, "");
+                const y_Price = $(this).find('td:nth-child(3)').text().replace(/\t|\n/gm, "");
+                let tip = "diesel"
+                if (tip === "diesel") {
+                    parsed_data.diesel.push({
+                        "City": capital,
+                        "Today": t_Price,
+                        "Yesterday": y_Price
+                    })
+                }
+
+            })
+            var data = {
+
+                petrol: parsed_data.petrol,
+                diesel: parsed_data.diesel,
+
+            };
+            res.json(data);
         }).catch(err => console.log(err))
-    
-       
-    
+
+
+
     }).catch(err => console.log(err))
 
 }
-
-function fetcher(){
+// Petrol and Diesel Price
+function fetcher() {
     axios.get(petrol_urls["Petrol_url"]).then((response) => {
 
         const html = response.data
         const $ = cheerio.load(html)
 
-        var type  = "petrol";
+        var type = "petrol";
         $('.even_row, .odd_row', html).each(function () {
             const capital = $(this).find('td:nth-child(1)').text();
             const t_Price = $(this).find('td:nth-child(2)').text().replace(/\t|\n/gm, "");
             const y_Price = $(this).find('td:nth-child(3)').text().replace(/\t|\n/gm, "");
 
-            if(type === "petrol") 
-            {
+            if (type === "petrol") {
                 parsed_data.petrol.push({
                     "City": capital,
                     "Today": t_Price,
                     "Yesterday": y_Price
-                })    
+                })
             }
-            
+
         })
-        type  = "diesel";
+        type = "diesel";
         axios.get(petrol_urls["Diesel_url"]).then((response) => {
             const html = response.data
             const $ = cheerio.load(html)
-        
 
 
-        $('.even_row, .odd_row', html).each(function () {
-            const capital = $(this).find('td:nth-child(1)').text();
-            const t_Price = $(this).find('td:nth-child(2)').text().replace(/\t|\n/gm, "");
-            const y_Price = $(this).find('td:nth-child(3)').text().replace(/\t|\n/gm, "");
-            let tip = "diesel"
-            if(tip=== "diesel") 
-            {
-                parsed_data.diesel.push({
-                    "City": capital,
-                    "Today": t_Price,
-                    "Yesterday": y_Price
-                })    
-            }
-            
-        })
-        // res.abort()
+
+            $('.even_row, .odd_row', html).each(function () {
+                const capital = $(this).find('td:nth-child(1)').text();
+                const t_Price = $(this).find('td:nth-child(2)').text().replace(/\t|\n/gm, "");
+                const y_Price = $(this).find('td:nth-child(3)').text().replace(/\t|\n/gm, "");
+                let tip = "diesel"
+                if (tip === "diesel") {
+                    parsed_data.diesel.push({
+                        "City": capital,
+                        "Today": t_Price,
+                        "Yesterday": y_Price
+                    })
+                }
+
+            })
+            // res.abort()
         }).catch(err => {
             // res.abort()
             console.log(err)
         })
-    
-       
-    
+
+
+
     }).catch(err => {
         // res.abort()
-        console.log(err)})
+        console.log(err)
+    })
 }
+function fetcherBankHolidays() {
+    axios.get(petrol_urls["BankHoliday_url"]).then((response) => {
+
+        const html = response.data
+        const $ = cheerio.load(html)
+        //  console.log(html)
+        $("body > table > tbody > tr", html).each((index, element) => {
+            console.log($(element).find("td"));
+        });
+
+        // $('.owspan="1" colspan="1" class="highlight"', html).each(function () {
+        //     const capital = $(this).find('td:nth-child(1)').text();
+        //     const t_Price = $(this).find('td:nth-child(2)').text().replace(/\t|\n/gm, "");
+        //     const y_Price = $(this).find('td:nth-child(3)').text().replace(/\t|\n/gm, "");
+
+        //     if(type === "petrol") 
+        //     {
+        //         parsed_data.petrol.push({
+        //             "City": capital,
+        //             "Today": t_Price,
+        //             "Yesterday": y_Price
+        //         })    
+        //     }
+
+        // })
+
+        console.log(parsed_data.holidays)
+
+
+
+    }).catch(err => {
+        // res.abort()
+        console.log(err)
+    })
+}
+
 
 //Petrol Routers
 app.get('/', (req, res) => {
@@ -230,307 +273,45 @@ app.get('/fuel-price/india', (req, res) => {
     script(res, petrol_urls["Petrol_url"], "petrol");
 })
 
-app.get('/petrol/andaman', (req, res) => {
-    script(res, petrol_urls["AN_url"], "petrol");
-})
-
-app.get('/petrol/andhrapradesh', (req, res) => {
-    script(res, petrol_urls["AP_url"], "petrol");
-})
-
-app.get('/petrol/arunachalpradesh', (req, res) => {
-    script(res, petrol_urls["AR_url"], "petrol");
-})
-
-app.get('/petrol/assam', (req, res) => {
-    script(res, petrol_urls["AS_url"], "petrol");
-})
-
-app.get('/petrol/bihar', (req, res) => {
-    script(res, petrol_urls["BR_url"], "petrol");
-})
-
-app.get('/petrol/chandigarh', (req, res) => {
-    script(res, petrol_urls["CH_url"], "petrol");
-})
-
-app.get('/petrol/chhatisgarh', (req, res) => {
-    script(res, petrol_urls["CG_url"], "petrol");
-})
-
-app.get('/petrol/dadranagarhaveli', (req, res) => {
-    script(res, petrol_urls["DH_url"], "petrol");
-})
-
-app.get('/petrol/damandiu', (req, res) => {
-    script(res, petrol_urls["DD_url"], "petrol");
-})
-
-app.get('/petrol/delhi', (req, res) => {
-    script(res, petrol_urls["DL_url"], "petrol");
-})
-
-app.get('/petrol/goa', (req, res) => {
-    script(res, petrol_urls["GA_url"], "petrol");
-})
-
-app.get('/petrol/gujarat', (req, res) => {
-    script(res, petrol_urls["GJ_url"], "petrol");
-})
-
-app.get('/petrol/haryana', (req, res) => {
-    script(res, petrol_urls["HR_url"], "petrol");
-})
-
-app.get('/petrol/himachalpradesh', (req, res) => {
-    script(res, petrol_urls["HP_url"], "petrol");
-})
-
-app.get('/petrol/jammukashmir', (req, res) => {
-    script(res, petrol_urls["JK_url"], "petrol");
-})
-
-app.get('/petrol/jharkhand', (req, res) => {
-    script(res, petrol_urls["JH_url"], "petrol");
-})
-
-app.get('/petrol/karnataka', (req, res) => {
-    script(res, petrol_urls["KA_url"], "petrol");
-})
-
-app.get('/petrol/kerala', (req, res) => {
-    script(res, petrol_urls["KL_url"], "petrol");
-})
-
-app.get('/petrol/madhyapradesh', (req, res) => {
-    script(res, petrol_urls["MP_url"], "petrol");
-})
-
-app.get('/petrol/maharashtra', (req, res) => {
-    script(res, petrol_urls["MH_url"], "petrol");
-})
-
-app.get('/petrol/manipur', (req, res) => {
-    script(res, petrol_urls["MN_url"], "petrol");
-})
-
-app.get('/petrol/meghalaya', (req, res) => {
-    script(res, petrol_urls["ML_url"], "petrol");
-})
-
-app.get('/petrol/mizoram', (req, res) => {
-    script(res, petrol_urls["MZ_url"], "petrol");
-})
-
-app.get('/petrol/nagaland', (req, res) => {
-    script(res, petrol_urls["NL_url"], "petrol");
-})
-
-app.get('/petrol/odisha', (req, res) => {
-    script(res, petrol_urls["OR_url"], "petrol");
-})
-
-app.get('/petrol/pondicherry', (req, res) => {
-    script(res, petrol_urls["PY_url"], "petrol");
-})
-
-app.get('/petrol/punjab', (req, res) => {
-    script(res, petrol_urls["PB_url"], "petrol");
-})
-
-app.get('/petrol/rajasthan', (req, res) => {
-    script(res, petrol_urls["RJ_url"], "petrol");
-})
-
-app.get('/petrol/sikkim', (req, res) => {
-    script(res, petrol_urls["SK_url"], "petrol");
-})
-
-app.get('/petrol/tamilnadu', (req, res) => {
-    script(res, petrol_urls["TN_url"], "petrol");
-})
-
-app.get('/petrol/telangana', (req, res) => {
-    script(res, petrol_urls["TS_url"], "petrol");
-})
-
-app.get('/petrol/tripura', (req, res) => {
-    script(res, petrol_urls["TR_url"], "petrol");
-})
-
-app.get('/petrol/uttarpradesh', (req, res) => {
-    script(res, petrol_urls["UP_url"], "petrol");
-})
-
-app.get('/petrol/uttarakhand', (req, res) => {
-    script(res, petrol_urls["UK_url"], "petrol");
-})
-
-app.get('/petrol/westbengal', (req, res) => {
-    script(res, petrol_urls["WB_url"]), "petrol";
-})
-
-//LPG Routers
-app.get('/lpg/india', (req, res) => {
-    script(res, lpg_urls["url"], "lpg");
-})
-
-app.get('/lpg/andaman', (req, res) => {
-    script(res, lpg_urls["AN_url"], "lpg");
-})
-
-app.get('/lpg/andhrapradesh', (req, res) => {
-    script(res, lpg_urls["AP_url"], "lpg");
-})
-
-app.get('/lpg/arunachalpradesh', (req, res) => {
-    script(res, lpg_urls["AR_url"], "lpg");
-})
-
-app.get('/lpg/assam', (req, res) => {
-    script(res, lpg_urls["AS_url"], "lpg");
-})
-
-app.get('/lpg/bihar', (req, res) => {
-    script(res, lpg_urls["BR_url"], "lpg");
-})
-
-app.get('/lpg/chandigarh', (req, res) => {
-    script(res, lpg_urls["CH_url"], "lpg");
-})
-
-app.get('/lpg/chhatisgarh', (req, res) => {
-    script(res, lpg_urls["CG_url"], "lpg");
-})
-
-app.get('/lpg/dadranagarhaveli', (req, res) => {
-    script(res, lpg_urls["DH_url"], "lpg");
-})
-
-app.get('/lpg/damandiu', (req, res) => {
-    script(res, lpg_urls["DD_url"], "lpg");
-})
-
-app.get('/lpg/delhi', (req, res) => {
-    script(res, lpg_urls["DL_url"], "lpg");
-})
-
-app.get('/lpg/goa', (req, res) => {
-    script(res, lpg_urls["GA_url"], "lpg");
-})
-
-app.get('/lpg/gujarat', (req, res) => {
-    script(res, lpg_urls["GJ_url"], "lpg");
-})
-
-app.get('/lpg/haryana', (req, res) => {
-    script(res, lpg_urls["HR_url"], "lpg");
-})
-
-app.get('/lpg/himachalpradesh', (req, res) => {
-    script(res, lpg_urls["HP_url"], "lpg");
-})
-
-app.get('/lpg/jammukashmir', (req, res) => {
-    script(res, lpg_urls["JK_url"], "lpg");
-})
-
-app.get('/lpg/jharkhand', (req, res) => {
-    script(res, lpg_urls["JH_url"], "lpg");
-})
-
-app.get('/lpg/karnataka', (req, res) => {
-    script(res, lpg_urls["KA_url"], "lpg");
-})
-
-app.get('/lpg/kerala', (req, res) => {
-    script(res, lpg_urls["KL_url"], "lpg");
-})
-
-app.get('/lpg/madhyapradesh', (req, res) => {
-    script(res, lpg_urls["MP_url"], "lpg");
-})
-
-app.get('/lpg/maharashtra', (req, res) => {
-    script(res, lpg_urls["MH_url"], "lpg");
-})
-
-app.get('/lpg/manipur', (req, res) => {
-    script(res, lpg_urls["MN_url"], "lpg");
-})
-
-app.get('/lpg/meghalaya', (req, res) => {
-    script(res, lpg_urls["ML_url"], "lpg");
-})
-
-app.get('/lpg/mizoram', (req, res) => {
-    script(res, lpg_urls["MZ_url"], "lpg");
-})
-
-app.get('/lpg/nagaland', (req, res) => {
-    script(res, lpg_urls["NL_url"], "lpg");
-})
-
-app.get('/lpg/odisha', (req, res) => {
-    script(res, lpg_urls["OR_url"], "lpg");
-})
-
-app.get('/lpg/pondicherry', (req, res) => {
-    script(res, lpg_urls["PY_url"], "lpg");
-})
-
-app.get('/lpg/punjab', (req, res) => {
-    script(res, lpg_urls["PB_url"], "lpg");
-})
-
-app.get('/lpg/rajasthan', (req, res) => {
-    script(res, lpg_urls["RJ_url"], "lpg");
-})
-
-app.get('/lpg/sikkim', (req, res) => {
-    script(res, lpg_urls["SK_url"], "lpg");
-})
-
-app.get('/lpg/tamilnadu', (req, res) => {
-    script(res, lpg_urls["TN_url"], "lpg");
-})
-
-app.get('/lpg/telangana', (req, res) => {
-    script(res, lpg_urls["TS_url"], "lpg");
-})
-
-app.get('/lpg/tripura', (req, res) => {
-    script(res, lpg_urls["TR_url"], "lpg");
-})
-
-app.get('/lpg/uttarpradesh', (req, res) => {
-    script(res, lpg_urls["UP_url"], "lpg");
-})
-
-app.get('/lpg/uttarakhand', (req, res) => {
-    script(res, lpg_urls["UK_url"], "lpg");
-})
-
-app.get('/lpg/westbengal', (req, res) => {
-    script(res, lpg_urls["WB_url"], "lpg");
-})
- var dd_mm_yy = function() {
+app.get('/nsd', (req, res) => {
+    console.log("APi Call")
+    var time = istDate()
+    if(time!=nsData.time || nsData.news.length<200){
+            getNewsByApi(req,res)
+    }else {
+        res.send(nsData.news)
+    }
+    
+})
+
+
+var dd_mm_yy = function () {
     var d = new Date();
     var curr_date = d.getDate();
-    var curr_month = d.getMonth()+1;
+    var curr_month = d.getMonth() + 1;
     var curr_year = d.getFullYear();
     return (curr_year + "-" + curr_month + "-" + curr_date);
-  }
- 
+}
+
+var istDate  = function(){
+    var baseDate =  Date().toLocaleString('en-US', {timeZone: 'Asia/Kolkata'})
+    var d = new Date(baseDate)
+    var curr_date = d.getDate();
+    if(curr_date<10) curr_date = `0${curr_date}`
+    var curr_month = d.getMonth() + 1;
+    if(curr_month<10) curr_month = `0${curr_month}`
+    var curr_year = d.getFullYear();
+    return (curr_year + "-" + curr_month + "-" + curr_date);
+}
 const one_day_milliseconds = 86400000;
 
 function intervalFunc() {
     var curDate = dd_mm_yy()
     // console.log("Hello!!!!");
-    var previousDateMilliseconds =  new Date(preDate).getTime()
-    var currentDateMilliseconds =   new Date(curDate).getTime()
+    var previousDateMilliseconds = new Date(preDate).getTime()
+    var currentDateMilliseconds = new Date(curDate).getTime()
     // console.log("--Difference ---"+(currentDateMilliseconds-previousDateMilliseconds))
-    
+
 
     if (currentDateMilliseconds - previousDateMilliseconds >= one_day_milliseconds) {
         console.log("One Day Passed");
@@ -539,16 +320,51 @@ function intervalFunc() {
         preDate = dd_mm_yy()
         fetcher()
 
-    }else {
+    } else {
         // console.log("One Day Passed");
-     }
+    }
 
- }
+}
 
- var preDate = 0
+var preDate = 0
+const AXIOS_OPTIONS = {
+    headers: {
+        "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Safari/537.36",
+    },                                                  // adding the User-Agent header as one way to prevent the request from being blocked
+    params: {
+        q: encodedString,                                // our encoded search string        
+        tbm: "nws",                                     // parameter defines the type of search you want to do ("nws" means news)
+        hl: 'en',                                       // Parameter defines the language to use for the Google search
+        gl: 'in'                                        // parameter defines the country to use for the Google search
+    },
+};
 
-//Port Mapping
+
+
+var nsData = { 
+    news: "", 
+    time:istDate()
+ } 
+function getNewsByApi(req,res){
+    var business_url = 'https://newsapi.org/v2/top-headlines?country=in&apiKey=2fb087f1232f444a9f70f34855146fc6&category=business'
+    // var business_url = 'https://newsapi.org/v2/top-headlines?country=in&apiKey=2fb087f1232f444a9f70f34855146fc6'
+     axios.get(business_url).then((response) => {
+        console.log(response.data)
+         nsData.news = response.data;
+         nsData.time = istDate()
+         res.send(nsData.news)
+
+    }).catch(err => {
+        // res.abort()
+        console.log(err)
+    })
+
+}
+
+
+
 app.listen(PORT, () => {
-    setInterval(intervalFunc,1500);
+    setInterval(intervalFunc, 1500);
     console.log(`Server is running at PORT HELLO ${PORT}`)
 })
