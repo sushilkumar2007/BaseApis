@@ -24,6 +24,7 @@ const hostname = "localhost",
 var con = mysql.createConnection({
     host: "localhost",
     user: "root",
+    port:PORT,
     password: "12345678",
     database: "BankDatabase"
 });
