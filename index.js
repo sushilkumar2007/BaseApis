@@ -1,4 +1,9 @@
 const PORT = process.env.PORT || 8000
+
+const DB_HOST = process.env.DB_HOST || 'localhost'
+const DB_USER = process.env.DB_USER || 'root'
+const DB_PASSWORD = process.env.DB_PASSWORD || '12345678'
+const DB_NAME = process.env.DB_NAME || 'usersdb'
 const express = require('express')
 const axios = require('axios')
 const cheerio = require('cheerio');
@@ -22,9 +27,10 @@ const hostname = "localhost",
 //     database: databsename,
 // });
 var con = mysql.createConnection({
-    host: "https://satisfying-jelly-production.up.railway.app/",
-    user: "root",
-    password: "12345678",
+    host: DB_HOST,
+    user: DB_USER,
+    password: DB_PASSWORD,
+    port:PORT,
     database: "BankDatabase"
 });
 
