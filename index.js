@@ -22,7 +22,7 @@ const hostname = "localhost",
 //     database: databsename,
 // });
 var con = mysql.createConnection({
-    host: "0.0.0.0",
+    host: "https://satisfying-jelly-production.up.railway.app/",
     user: "root",
     password: "12345678",
     database: "BankDatabase"
