@@ -438,5 +438,5 @@ function getNewsByApi(req, res) {
 
 app.listen(PORT, () => {
     setInterval(intervalFunc, 1500);
-    console.log(`Server is running at PORT HELLO ${PORT}`)
+    console.log(`Server  Sushil is running at PORT HELLO ${PORT}`)
 })
