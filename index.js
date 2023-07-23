@@ -27,11 +27,11 @@ const hostname = "localhost",
 //     database: databsename,
 // });
 var con = mysql.createConnection({
-    host: DB_HOST,
-    user: DB_USER,
-    password: DB_PASSWORD,
-    port:PORT,
-    database: "BankDatabase"
+    host: 'containers-us-west-135.railway.app',
+    user: 'root',
+    password: 'yAhGf57qQ8DiEPr5lzl5',
+    port:'7297',
+    database: "railway"
 });
 
 
@@ -43,21 +43,21 @@ con.connect(function (err) {
     };
     console.log("Connected");
     let databaseName = "BankDatabase";
-    let createQuery = `CREATE DATABASE IF NOT EXISTS ${databaseName}`;
-    con.query(createQuery, (err) => {
-        if (err) throw err;
+    // let createQuery = `CREATE DATABASE IF NOT EXISTS ${databaseName}`;
+    // con.query(createQuery, (err) => {
+    //     if (err) throw err;
 
-        console.log("Database Created Successfully !");
+    //     console.log("Database Created Successfully !");
 
 
-    })
-    con.query("DROP TABLE BankInfo", (err, drop) => {
-      if (err)
-        console.log("ERROR: ", err);
+    // })
+    // con.query("DROP TABLE BankInfo", (err, drop) => {
+    //   if (err)
+    //     console.log("ERROR: ", err);
         
-        console.log("Table Dropped !");
+    //     console.log("Table Dropped !");
 
-    });
+    // });
   
     var createStatament =
         "CREATE TABLE IF NOT EXISTS BankInfo (id INT AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),icon VARCHAR(1000),mobileBalance VARCHAR(255),callRequiredForbalance boolean DEFAULT false,smsTemplate VARCHAR(255),mobileMiniStatement VARCHAR(500),type VARCHAR(255),isPopular boolean DEFAULT false,CallRequiredForMiniStatement boolean DEFAULT false,customerCareNumber VARCHAR(255),twitter VARCHAR(255),email VARCHAR(255),headQuarters VARCHAR(255),founded VARCHAR(255),website VARCHAR(500),code VARCHAR(500),netbanking VARCHAR(1000),fdrates VARCHAR(1000))"
