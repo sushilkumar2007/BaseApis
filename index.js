@@ -338,14 +338,14 @@ app.get('/push', (req, res) => {
             `INSERT INTO  BankInfo values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
              var items = [null,name, icon, mobileBalance, callRequiredForbalance, smsTemplate, mobileMiniStatement, type, isPopular,CallRequiredForMiniStatement,customerCareNumber, twitter, email, headQuarters, founded, website, code ,netbanking,fdrates];
                         //  (null,'','','',true,'','','',false,false,'','','','','','','','','')
-             con.query(insertStatement, items, 
-                    (err, results, fields) => {
-                    if (err) {
-                        console.log(
-                       "Unable to insert item at row ", i + 1);
-                        return console.log(err);
-                    }
-                });
+            //  con.query(insertStatement, items, 
+            //         (err, results, fields) => {
+            //         if (err) {
+            //             console.log(
+            //            "Unable to insert item at row ", i + 1);
+            //             return console.log(err);
+            //         }
+            //     });
 
         } 
         console.log(
