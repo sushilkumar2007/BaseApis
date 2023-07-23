@@ -7,7 +7,7 @@ const DB_NAME = process.env.DB_NAME || 'usersdb'
 const express = require('express')
 const axios = require('axios')
 const cheerio = require('cheerio');
-var mysql = require('mysql');
+var mysql = require('mysql2');
 const app = express();
 // const mysql = msq()
 
