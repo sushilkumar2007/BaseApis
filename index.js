@@ -22,7 +22,7 @@ const hostname = "localhost",
 //     database: databsename,
 // });
 var con = mysql.createConnection({
-    host: "localhost",
+    host: "0.0.0.0",
     user: "root",
     port:PORT,
     password: "12345678",
