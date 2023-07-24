@@ -308,6 +308,15 @@ app.get('/getbanklist', (req, res) => {
       });
 
 })
+app.get('/gettopbanklist', (req, res) => {
+    var query = `select id,name,icon,code from BankInfo where isPopular=1`
+    con.query(query, function (err, result, fields) {
+        if (err) throw err;
+            console.log(result);
+            res.send({ data: result })
+      });
+
+})
 //sd
 
 app.get('/push', (req, res) => {
