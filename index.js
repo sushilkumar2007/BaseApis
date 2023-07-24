@@ -51,16 +51,16 @@ con.connect(function (err) {
 
 
     // })
-    // con.query("DROP TABLE BankInfo", (err, drop) => {
-    //   if (err)
-    //     console.log("ERROR: ", err);
+    con.query("DROP TABLE BankInfo", (err, drop) => {
+      if (err)
+        console.log("ERROR: ", err);
         
-    //     console.log("Table Dropped !");
+        console.log("Table Dropped !");
 
-    // });
+    });
   
     var createStatament =
-        "CREATE TABLE IF NOT EXISTS BankInfo (id INT AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),icon VARCHAR(1000),mobileBalance VARCHAR(255),callRequiredForbalance boolean DEFAULT false,smsTemplate VARCHAR(255),mobileMiniStatement VARCHAR(500),type VARCHAR(255),isPopular boolean DEFAULT false,CallRequiredForMiniStatement boolean DEFAULT false,customerCareNumber VARCHAR(255),twitter VARCHAR(255),email VARCHAR(255),headQuarters VARCHAR(255),founded VARCHAR(255),website VARCHAR(500),code VARCHAR(500),netbanking VARCHAR(1000),fdrates VARCHAR(1000))"
+        "CREATE TABLE IF NOT EXISTS BankInfo (id INT AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),icon VARCHAR(1000),mobileBalance VARCHAR(255),callRequiredForbalance boolean DEFAULT false,smsTemplate VARCHAR(255),mobileMiniStatement VARCHAR(500),type VARCHAR(255),isPopular boolean DEFAULT false,CallRequiredForMiniStatement boolean DEFAULT false,customerCareNumber VARCHAR(255),twitter VARCHAR(255),email VARCHAR(255),headQuarters VARCHAR(255),founded VARCHAR(255),website VARCHAR(500),code VARCHAR(500),netbanking VARCHAR(1000),fdrates VARCHAR(1000),creditcard VARCHAR(200))"
 
     // Creating table "sample"
     con.query(createStatament, (err, drop) => {
@@ -286,6 +286,9 @@ var bankInfo = {
     founded: "",
     website: "",
     code: "",
+    netbanking: "",
+    fdrates: "",
+    creditcard: "",
 }
 app.get('/getbankdetails/:id', (req, res) => {
     var query = `select * from BankInfo where id=${req.params.id}`
@@ -332,20 +335,22 @@ app.get('/push', (req, res) => {
             founded = bankInfoArray[i].founded,
             website = bankInfoArray[i].website,
             code = bankInfoArray[i].code,
-            netbanking = "",
-            fdrates = ""
+            netbanking = bankInfoArray[i].netbanking,
+            fdrates = bankInfoArray[i].fdrated,
+            creditcard = bankInfoArray[i].creditcard
+
              var insertStatement =
-            `INSERT INTO  BankInfo values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
-             var items = [null,name, icon, mobileBalance, callRequiredForbalance, smsTemplate, mobileMiniStatement, type, isPopular,CallRequiredForMiniStatement,customerCareNumber, twitter, email, headQuarters, founded, website, code ,netbanking,fdrates];
+            `INSERT INTO  BankInfo values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+             var items = [null,name, icon, mobileBalance, callRequiredForbalance, smsTemplate, mobileMiniStatement, type, isPopular,CallRequiredForMiniStatement,customerCareNumber, twitter, email, headQuarters, founded, website, code ,netbanking,fdrates,creditcard];
                         //  (null,'','','',true,'','','',false,false,'','','','','','','','','')
-            //  con.query(insertStatement, items, 
-            //         (err, results, fields) => {
-            //         if (err) {
-            //             console.log(
-            //            "Unable to insert item at row ", i + 1);
-            //             return console.log(err);
-            //         }
-            //     });
+             con.query(insertStatement, items, 
+                    (err, results, fields) => {
+                    if (err) {
+                        console.log(
+                       "Unable to insert item at row ", i + 1);
+                        return console.log(err);
+                    }
+                });
 
         } 
         console.log(
