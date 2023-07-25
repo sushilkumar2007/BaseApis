@@ -8,6 +8,7 @@ const express = require('express')
 const axios = require('axios')
 const cheerio = require('cheerio');
 var mysql = require('mysql2');
+var csv = require('csvtojson');
 const app = express();
 // const mysql = msq()
 
@@ -80,7 +81,7 @@ con.connect(function (err) {
 
 
 
-const fileName = "IFSC_2021.csv";
+const fileName = "IFSC_2020.csv";
 
 // csv().fromFile(fileName).then(source => {
 
@@ -308,6 +309,11 @@ app.get('/getbanklist', (req, res) => {
       });
 
 })
+
+
+
+
+
 app.get('/gettopbanklist', (req, res) => {
     var query = `select id,name,icon,code from BankInfo where isPopular=1`
     con.query(query, function (err, result, fields) {
@@ -317,6 +323,110 @@ app.get('/gettopbanklist', (req, res) => {
       });
 
 })
+
+app.get('/getStateList/:bankcode', (req, res) => {
+       // var query = `select distinct state from IFSC_DATA_2021 where IFSC=${req.params.bankcode}`
+//    var query = `SELECT distinct state FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%'`
+    // var query = `SELECT state FROM IFSC_DATA_2020`
+
+    var query = 'Select count(*) from IFSC_DATA_2020'
+ 
+    console.log("--query--",query)
+    con.query(query, function (err, result, fields) {
+        if (err){
+            console.log("--error--",err);
+            throw err
+             };
+             sconsole.log(result);
+            res.send({ data: result })
+      });
+
+})
+
+
+app.get('/setBankData', (req, res) => {
+
+    con.query("DROP TABLE IFSC_DATA_2020", (err, drop) => {
+      if (err)
+        console.log("ERROR: ", err);
+        
+        console.log("Table Dropped !");
+
+    });
+   
+    var createStatament = 
+    "CREATE TABLE IFSC_DATA_2020 (BANK VARCHAR(255),IFSC VARCHAR(255),BRANCH VARCHAR(255),CENTRE VARCHAR(255),DISTRICT VARCHAR(255),STATE VARCHAR(255),ADDRESS VARCHAR(500),CONTACT VARCHAR(255),IMPS VARCHAR(255),RTGS VARCHAR(255),CITY VARCHAR(255),ISO3166 VARCHAR(255),NEFT VARCHAR(255),MICR VARCHAR(255),UPI VARCHAR(255),SWIFT VARCHAR(255))"
+
+  // Creating table "sample"
+    con.query(createStatament, (err, drop) => {
+      if (err)
+          console.log("ERROR: ", err);
+       
+          console.log("IFSC table creadted")
+          
+    });
+
+    /// insert Data Part
+
+        csv().fromFile(fileName).then(source => {
+  
+        console.log(
+          "Runing");
+          // Fetching the data from each row 
+          // and inserting to the table "sample"
+          console.log("--soruce lnegth--",source.length)
+          var counter = 0;
+          for (var i = 0; i < source.length; i++) {
+              var BANK = source[i]["BANK"],
+                  IFSC = source[i]["IFSC"],
+                  BRANCH = source[i]["BRANCH"],
+                  CENTRE = source[i]["CENTRE"],
+                  DISTRICT = source[i]["DISTRICT"],
+                  STATE = source[i]["STATE"],
+                  ADDRESS = source[i]["ADDRESS"],
+                  CONTACT = source[i]["CONTACT"],
+                  IMPS = source[i]["IMPS"],
+                  RTGS = source[i]["RTGS"],
+                  CITY = source[i]["CITY"],
+                  ISO3166 = source[i]["ISO3166"],
+                  NEFT = source[i]["NEFT"],
+                  MICR = source[i]["MICR"],
+                  UPI = source[i]["UPI"],
+                  SWIFT = source[i]["SWIFT"]
+      
+        
+              var insertStatement = 
+              `INSERT INTO IFSC_DATA_2020 values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+              var items = [BANK,IFSC,BRANCH,CENTRE,DISTRICT,STATE,ADDRESS,CONTACT,IMPS,RTGS,CITY,ISO3166,NEFT,MICR,UPI,SWIFT];
+        
+              // Inserting data of current row
+              // into database
+              con.query(insertStatement, items, 
+                  (err, results, fields) => {
+                  if (err) {
+                      console.log(
+                "Unable to insert item at row ", i + 1);
+                      return console.log(err);
+                  }
+                  
+                  counter = counter+1;
+              });
+          }
+          console.log("--counter--"+counter)
+          console.log(
+      "All items stored into database successfully");
+      });
+
+
+
+
+})
+
+
+
+
+
+
 //sd
 
 app.get('/push', (req, res) => {
