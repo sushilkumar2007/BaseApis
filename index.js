@@ -355,8 +355,11 @@ app.get('/getDistrict/:bankcode/:state', (req, res) => {
 
 app.get('/getBranch/:state/:district/:bankcode', (req, res) => {
     // var query = `select distinct state from IFSC_DATA_2021 where IFSC=${req.params.bankcode}`
-  var query = `SELECT distinct branch FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%' and district like '%${req.params.district}% and state like '%${req.params.state}%'`
- con.query(query, function (err, result, fields) {
+  var query = `SELECT distinct branch FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%' and district like '%${req.params.district}%' and state like '%${req.params.state}%'`
+//   SELECT branch FROM railway.IFSC_DATA_2020 where IFSC like '%ALLA%' and district like '%SHAHADARA%'  and state like '%DELHI%'
+
+ 
+  con.query(query, function (err, result, fields) {
      if (err){
          console.log("--error--",err);
          throw err
