@@ -145,7 +145,9 @@ parsed_data.holidays = []
 //Main Script for parsing necessary data
 function script(res, url, type) {
 
-    if (parsed_data.petrol.length > 0 && parsed_data.diesel.length > 0) {
+    var time = istDate()
+
+    if (parsed_data.petrol.length > 0 && parsed_data.diesel.length > 0 && time == psData.time ) {
         var data = {
 
             petrol: parsed_data.petrol,
@@ -204,6 +206,7 @@ function script(res, url, type) {
                 diesel: parsed_data.diesel,
 
             };
+            psData.time = istDate()
             res.json(data);
         }).catch(err => console.log(err))
 
@@ -329,7 +332,6 @@ app.get('/getStateList/:bankcode', (req, res) => {
      var query = `SELECT distinct state FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%'`
     con.query(query, function (err, result, fields) {
         if (err){
-            console.log("--error--",err);
             throw err
              };
             //  console.log(result);
@@ -344,7 +346,6 @@ app.get('/getDistrict/:bankcode/:state', (req, res) => {
   var query = `SELECT distinct district FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%' and state like '%${req.params.state}%'`
  con.query(query, function (err, result, fields) {
      if (err){
-         console.log("--error--",err);
          throw err
           };
           var districts = [...new Set(result.map(x => x.district))];
@@ -355,13 +356,12 @@ app.get('/getDistrict/:bankcode/:state', (req, res) => {
 
 app.get('/getBranch/:state/:district/:bankcode', (req, res) => {
     // var query = `select distinct state from IFSC_DATA_2021 where IFSC=${req.params.bankcode}`
-  var query = `SELECT distinct branch FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%' and district like '%${req.params.district}%' and state like '%${req.params.state}%'`
+  var query = `SELECT distinct branch FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%' and district like '%${req.params.district}% and state like '%${req.params.state}%'`
 //   SELECT branch FROM railway.IFSC_DATA_2020 where IFSC like '%ALLA%' and district like '%SHAHADARA%'  and state like '%DELHI%'
 
  
   con.query(query, function (err, result, fields) {
      if (err){
-         console.log("--error--",err);
          throw err
           };
           var branches = [...new Set(result.map(x => x.branch))];
@@ -373,13 +373,13 @@ app.get('/getBranch/:state/:district/:bankcode', (req, res) => {
 app.get('/getifsc/:bankcode/:branch', (req, res) => {
     // var query = `select distinct state from IFSC_DATA_2021 where IFSC=${req.params.bankcode}`
   var query = `SELECT * FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%' and branch like '%${req.params.branch}%'`
-  console.log("--f query ---",query) 
+
   con.query(query, function (err, result, fields) {
      if (err){
-         console.log("--error--",err);
+        
          throw err
           };
-          console.log(result);
+         
          res.send({ data: result })
    });
 
@@ -598,6 +598,11 @@ var nsData = {
     news: "",
     time: istDate()
 }
+
+var psData = {
+    time: istDate()
+}
+
 function getNewsByApi(req, res) {
     var business_url = 'https://newsapi.org/v2/top-headlines?country=in&apiKey=2fb087f1232f444a9f70f34855146fc6&category=business'
     // var business_url = 'https://newsapi.org/v2/top-headlines?country=in&apiKey=2fb087f1232f444a9f70f34855146fc6'
