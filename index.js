@@ -260,6 +260,7 @@ function fetcher() {
             })
             // res.abort()
         }).catch(err => {
+            throw err
             // res.abort()
             console.log(err)
         })
@@ -346,7 +347,7 @@ app.get('/getDistrict/:bankcode/:state', (req, res) => {
   var query = `SELECT distinct district FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%' and state like '%${req.params.state}%'`
  con.query(query, function (err, result, fields) {
      if (err){
-         //throw err
+        throw err
           };
           var districts = [...new Set(result.map(x => x.district))];
           res.send({districts})
@@ -362,7 +363,7 @@ app.get('/getBranch/:state/:district/:bankcode', (req, res) => {
  
   con.query(query, function (err, result, fields) {
      if (err){
-            //throw err
+            throw err
           };
           var branches = [...new Set(result.map(x => x.branch))];
           res.send({branches})
@@ -377,7 +378,7 @@ app.get('/getifsc/:bankcode/:branch', (req, res) => {
   con.query(query, function (err, result, fields) {
      if (err){
         
-         //throw err
+            throw err
           };
          
          res.send({ data: result })
