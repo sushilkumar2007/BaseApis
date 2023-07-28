@@ -218,7 +218,7 @@ function script(res, url, type) {
 // Petrol and Diesel Price
 function fetcher() {
     axios.get(petrol_urls["Petrol_url"]).then((response) => {
-
+//
         const html = response.data
         const $ = cheerio.load(html)
 
