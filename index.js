@@ -10,6 +10,7 @@ const cheerio = require('cheerio');
 var mysql = require('mysql2');
 var csv = require('csvtojson');
 const app = express();
+let connectionRequest = require('./connectionRequest')
 // const mysql = msq()
 
 
@@ -27,55 +28,58 @@ const hostname = "localhost",
 //     password: password,
 //     database: databsename,
 // });
-var con = mysql.createConnection({
-    host: 'containers-us-west-135.railway.app',
-    user: 'root',
-    password: 'yAhGf57qQ8DiEPr5lzl5',
-    port:'7297',
-    database: "railway"
-});
-
-
-con.connect(function (err) {
-    console.log("Try to connect")
-    if (err) {
-        console.log("Error ", err)
-        throw err
-    };
-    console.log("Connected");
-    let databaseName = "BankDatabase";
-    // let createQuery = `CREATE DATABASE IF NOT EXISTS ${databaseName}`;
-    // con.query(createQuery, (err) => {
-    //     if (err) throw err;
-
-    //     console.log("Database Created Successfully !");
-
-
-    // })
-    // con.query("DROP TABLE BankInfo", (err, drop) => {
-    //   if (err)
-    //     console.log("ERROR: ", err);
-        
-    //     console.log("Table Dropped !");
-
-    // });
-  
-    // var createStatament =
-    //     "CREATE TABLE IF NOT EXISTS BankInfo (id INT AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),icon VARCHAR(1000),mobileBalance VARCHAR(255),callRequiredForbalance boolean DEFAULT false,smsTemplate VARCHAR(255),mobileMiniStatement VARCHAR(500),type VARCHAR(255),isPopular boolean DEFAULT false,CallRequiredForMiniStatement boolean DEFAULT false,customerCareNumber VARCHAR(255),twitter VARCHAR(255),email VARCHAR(255),headQuarters VARCHAR(255),founded VARCHAR(255),website VARCHAR(500),code VARCHAR(500),netbanking VARCHAR(1000),fdrates VARCHAR(1000),creditcard VARCHAR(200))"
-
-    // // Creating table "sample"
-    // con.query(createStatament, (err, drop) => {
-    //     if (err)
-    //         console.log("ERROR: ", err);
-         
-    //         console.log("Table Created !");
-    // });
-    //
 
 
 
+// var con = mysql.createConnection({
+//     host: 'containers-us-west-135.railway.app',
+//     user: 'root',
+//     password: 'yAhGf57qQ8DiEPr5lzl5',
+//     port:'7297',
+//     database: "railway"
+// });
 
-});
+
+// con.connect(function (err) {
+//     console.log("Try to connect")
+//     if (err) {
+//         console.log("Error ", err)
+//         throw err
+//     };
+//     console.log("Connected");
+//     let databaseName = "BankDatabase";
+//     // let createQuery = `CREATE DATABASE IF NOT EXISTS ${databaseName}`;
+//     // con.query(createQuery, (err) => {
+//     //     if (err) throw err;
+
+//     //     console.log("Database Created Successfully !");
+
+
+//     // })
+//     // con.query("DROP TABLE BankInfo", (err, drop) => {
+//     //   if (err)
+//     //     console.log("ERROR: ", err);
+
+//     //     console.log("Table Dropped !");
+
+//     // });
+
+//     // var createStatament =
+//     //     "CREATE TABLE IF NOT EXISTS BankInfo (id INT AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),icon VARCHAR(1000),mobileBalance VARCHAR(255),callRequiredForbalance boolean DEFAULT false,smsTemplate VARCHAR(255),mobileMiniStatement VARCHAR(500),type VARCHAR(255),isPopular boolean DEFAULT false,CallRequiredForMiniStatement boolean DEFAULT false,customerCareNumber VARCHAR(255),twitter VARCHAR(255),email VARCHAR(255),headQuarters VARCHAR(255),founded VARCHAR(255),website VARCHAR(500),code VARCHAR(500),netbanking VARCHAR(1000),fdrates VARCHAR(1000),creditcard VARCHAR(200))"
+
+//     // // Creating table "sample"
+//     // con.query(createStatament, (err, drop) => {
+//     //     if (err)
+//     //         console.log("ERROR: ", err);
+
+//     //         console.log("Table Created !");
+//     // });
+//     //
+
+
+
+
+// });
 
 
 
@@ -147,7 +151,7 @@ function script(res, url, type) {
 
     var time = istDate()
 
-    if (parsed_data.petrol.length > 0 && parsed_data.diesel.length > 0 && time == psData.time ) {
+    if (parsed_data.petrol.length > 0 && parsed_data.diesel.length > 0 && time == psData.time) {
         var data = {
 
             petrol: parsed_data.petrol,
@@ -218,7 +222,7 @@ function script(res, url, type) {
 // Petrol and Diesel Price
 function fetcher() {
     axios.get(petrol_urls["Petrol_url"]).then((response) => {
-//
+        //
         const html = response.data
         const $ = cheerio.load(html)
 
@@ -297,20 +301,42 @@ var bankInfo = {
 }
 app.get('/getbankdetails/:id', (req, res) => {
     var query = `select * from BankInfo where id=${req.params.id}`
-    con.query(query, function (err, result, fields) {
-        if (err) throw err;
-            
+    var connection = connectionRequest()
+    connection.query(query, function (err, result, fields) {
+        if (!err) {
+
             res.send({ data: result })
-      });
+            connection.destroy()
+
+
+        } else {
+            console.log(err);
+            res.send("Error")
+            connection.destroy()
+        }
+
+    });
 
 })
 
 app.get('/getbanklist', (req, res) => {
-    con.query("select id,name,icon,code from BankInfo", function (err, result, fields) {
-        if (err) throw err;
-          
+    var query = "select id,name,icon,code from BankInfo";
+    var connection = connectionRequest()
+    connection.query(query, function (err, result, fields) {
+        if (!err) {
+
             res.send({ data: result })
-      });
+            connection.destroy()
+
+
+        } else {
+            console.log(err);
+            res.send("Error")
+            connection.destroy()
+        }
+
+    });
+
 
 })
 
@@ -320,69 +346,113 @@ app.get('/getbanklist', (req, res) => {
 
 app.get('/gettopbanklist', (req, res) => {
     var query = `select id,name,icon,code from BankInfo where isPopular=1`
-    con.query(query, function (err, result, fields) {
-        if (err) throw err;
-            
+
+
+    var connection = connectionRequest()
+    connection.query(query, function (err, result, fields) {
+        if (!err) {
+
             res.send({ data: result })
-      });
+            connection.destroy()
+
+
+        } else {
+            console.log(err);
+            res.send("Error")
+            connection.destroy()
+        }
+
+    });
+
+
 
 })
 
 app.get('/getStateList/:bankcode', (req, res) => {
-       // var query = `select distinct state from IFSC_DATA_2021 where IFSC=${req.params.bankcode}`
-     var query = `SELECT distinct state FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%'`
-    con.query(query, function (err, result, fields) {
-        if (err){
-            throw err
-             };
-            //  console.log(result);
+
+    var query = `SELECT distinct state FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%'`
+    var connection = connectionRequest()
+    connection.query(query, function (err, result, fields) {
+        if (!err) {
+
             var states = [...new Set(result.map(x => x.state))];
-            res.send({states})
-      });
+            res.send({ states })
+            connection.destroy()
+
+
+        } else {
+            console.log(err);
+            res.send("Error")
+            connection.destroy()
+        }
+
+    });
+
 
 })
 
 app.get('/getDistrict/:bankcode/:state', (req, res) => {
     // var query = `select distinct state from IFSC_DATA_2021 where IFSC=${req.params.bankcode}`
-  var query = `SELECT distinct district FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%' and state like '%${req.params.state}%'`
- con.query(query, function (err, result, fields) {
-     if (err){
-        throw err
-          };
-          var districts = [...new Set(result.map(x => x.district))];
-          res.send({districts})
-   });
+    var query = `SELECT distinct district FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%' and state like '%${req.params.state}%'`
+    var connection = connectionRequest()
+    connection.query(query, function (err, result, fields) {
+        if (!err) {
+
+            var districts = [...new Set(result.map(x => x.district))];
+            res.send({ districts })
+            connection.destroy()
+
+
+        } else {
+            console.log(err);
+            res.send("Error")
+            connection.destroy()
+        }
+
+    });
 
 })
 
 app.get('/getBranch/:state/:district/:bankcode', (req, res) => {
-    // var query = `select distinct state from IFSC_DATA_2021 where IFSC=${req.params.bankcode}`
-  var query = `SELECT distinct branch FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%' and district like '%${req.params.district}%' and state like '%${req.params.state}%'`
-//   SELECT branch FROM railway.IFSC_DATA_2020 where IFSC like '%ALLA%' and district like '%SHAHADARA%'  and state like '%DELHI%'
 
- 
-  con.query(query, function (err, result, fields) {
-     if (err){
-            throw err
-          };
-          var branches = [...new Set(result.map(x => x.branch))];
-          res.send({branches})
-   });
+    var query = `SELECT distinct branch FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%' and district like '%${req.params.district}%' and state like '%${req.params.state}%'`
+    var connection = connectionRequest()
+    connection.query(query, function (err, result, fields) {
+        if (!err) {
+
+            var branches = [...new Set(result.map(x => x.branch))];
+            res.send({ branches })
+            connection.destroy()
+
+
+        } else {
+            console.log(err);
+            res.send("Error")
+            connection.destroy()
+        }
+
+    });
 
 })
 
 app.get('/getifsc/:bankcode/:branch', (req, res) => {
     // var query = `select distinct state from IFSC_DATA_2021 where IFSC=${req.params.bankcode}`
-  var query = `SELECT * FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%' and branch like '%${req.params.branch}%'`
+    var query = `SELECT * FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%' and branch like '%${req.params.branch}%'`
+    var connection = connectionRequest()
+    connection.query(query, function (err, result, fields) {
+        if (!err) {
 
-  con.query(query, function (err, result, fields) {
-     if (err){
-        
-            throw err
-          };
-         
-         res.send({ data: result })
-   });
+            res.send({ data: result })
+            connection.destroy()
+
+
+        } else {
+            console.log(err);
+            res.send("Error")
+            connection.destroy()
+        }
+
+    });
 
 })
 
@@ -393,11 +463,11 @@ app.get('/getifsc/:bankcode/:branch', (req, res) => {
 // //     con.query("DROP TABLE IFSC_DATA_2020", (err, drop) => {
 // //       if (err)
 // //         console.log("ERROR: ", err);
-        
+
 // //         console.log("Table Dropped !");
 
 // //     });
-   
+
 // //     var createStatament = 
 // //     "CREATE TABLE IFSC_DATA_2020 (BANK VARCHAR(255),IFSC VARCHAR(255),BRANCH VARCHAR(255),CENTRE VARCHAR(255),DISTRICT VARCHAR(255),STATE VARCHAR(255),ADDRESS VARCHAR(500),CONTACT VARCHAR(255),IMPS VARCHAR(255),RTGS VARCHAR(255),CITY VARCHAR(255),ISO3166 VARCHAR(255),NEFT VARCHAR(255),MICR VARCHAR(255),UPI VARCHAR(255),SWIFT VARCHAR(255))"
 
@@ -405,15 +475,15 @@ app.get('/getifsc/:bankcode/:branch', (req, res) => {
 // //     con.query(createStatament, (err, drop) => {
 // //       if (err)
 // //           console.log("ERROR: ", err);
-       
+
 // //           console.log("IFSC table creadted")
-          
+
 // //     });
 
 //     /// insert Data Part
 
 //         csv().fromFile(fileName).then(source => {
-  
+
 //         console.log(
 //           "Runing");
 //           // Fetching the data from each row 
@@ -439,12 +509,12 @@ app.get('/getifsc/:bankcode/:branch', (req, res) => {
 //                   MICR = source[i]["MICR"],
 //                   UPI = source[i]["UPI"],
 //                   SWIFT = source[i]["SWIFT"]
-      
-        
+
+
 //               var insertStatement = 
 //               `INSERT INTO IFSC_DATA_2020 values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 //               var items = [BANK,IFSC,BRANCH,CENTRE,DISTRICT,STATE,ADDRESS,CONTACT,IMPS,RTGS,CITY,ISO3166,NEFT,MICR,UPI,SWIFT];
-        
+
 //               // Inserting data of current row
 //               // into database
 //               con.query(insertStatement, items, 
@@ -454,13 +524,13 @@ app.get('/getifsc/:bankcode/:branch', (req, res) => {
 //                 "Unable to insert item at row ", i + 1);
 //                       return console.log(err);
 //                   }
-                  
+
 //                   counter = counter+1;
 //               });
 //           }
 //           console.log("--counter--"+counter)
 //           console.log( "All items stored into database successfully");
-     
+
 //       });
 
 
@@ -476,38 +546,38 @@ app.get('/getifsc/:bankcode/:branch', (req, res) => {
 //sd
 
 app.get('/push', (req, res) => {
-//
+    //
     var firebase_url = "https://bank-info-ce9ad-default-rtdb.firebaseio.com/data.json"
     axios.get(firebase_url).then((response) => {
         // console.log(response.data)
         var bankInfoArray = response.data;
 
         for (var i in bankInfoArray) {
-           
-            var name = bankInfoArray[i].name,
-            icon = bankInfoArray[i].icon,
-            mobileBalance = bankInfoArray[i].mobileBalance,
-            callRequiredForbalance = bankInfoArray[i].callRequiredForbalance,
-            smsTemplate = bankInfoArray[i].smsTemplate,
-            mobileMiniStatement = bankInfoArray[i].mobileMiniStatement,
-            type =  bankInfoArray[i].type,
-            isPopular = bankInfoArray[i].isPopular,
-            CallRequiredForMiniStatement = bankInfoArray[i].CallRequiredForMiniStatement,
-            customerCareNumber = bankInfoArray[i].customerCareNumber,
-            twitter  = bankInfoArray[i].twitter ,
-            email = bankInfoArray[i].email,
-            headQuarters = bankInfoArray[i].headQuarters,
-            founded = bankInfoArray[i].founded,
-            website = bankInfoArray[i].website,
-            code = bankInfoArray[i].code,
-            netbanking = bankInfoArray[i].netbanking,
-            fdrates = bankInfoArray[i].fdrated,
-            creditcard = bankInfoArray[i].creditcard
 
-             var insertStatement =
-            `INSERT INTO  BankInfo values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
-             var items = [null,name, icon, mobileBalance, callRequiredForbalance, smsTemplate, mobileMiniStatement, type, isPopular,CallRequiredForMiniStatement,customerCareNumber, twitter, email, headQuarters, founded, website, code ,netbanking,fdrates,creditcard];
-                        //  (null,'','','',true,'','','',false,false,'','','','','','','','','')
+            var name = bankInfoArray[i].name,
+                icon = bankInfoArray[i].icon,
+                mobileBalance = bankInfoArray[i].mobileBalance,
+                callRequiredForbalance = bankInfoArray[i].callRequiredForbalance,
+                smsTemplate = bankInfoArray[i].smsTemplate,
+                mobileMiniStatement = bankInfoArray[i].mobileMiniStatement,
+                type = bankInfoArray[i].type,
+                isPopular = bankInfoArray[i].isPopular,
+                CallRequiredForMiniStatement = bankInfoArray[i].CallRequiredForMiniStatement,
+                customerCareNumber = bankInfoArray[i].customerCareNumber,
+                twitter = bankInfoArray[i].twitter,
+                email = bankInfoArray[i].email,
+                headQuarters = bankInfoArray[i].headQuarters,
+                founded = bankInfoArray[i].founded,
+                website = bankInfoArray[i].website,
+                code = bankInfoArray[i].code,
+                netbanking = bankInfoArray[i].netbanking,
+                fdrates = bankInfoArray[i].fdrated,
+                creditcard = bankInfoArray[i].creditcard
+
+            var insertStatement =
+                `INSERT INTO  BankInfo values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+            var items = [null, name, icon, mobileBalance, callRequiredForbalance, smsTemplate, mobileMiniStatement, type, isPopular, CallRequiredForMiniStatement, customerCareNumber, twitter, email, headQuarters, founded, website, code, netbanking, fdrates, creditcard];
+            //  (null,'','','',true,'','','',false,false,'','','','','','','','','')
             //  con.query(insertStatement, items, 
             //         (err, results, fields) => {
             //         if (err) {
@@ -517,7 +587,7 @@ app.get('/push', (req, res) => {
             //         }
             //     });
 
-        } 
+        }
         console.log(
             "All items stored into database successfully");
 
@@ -541,7 +611,7 @@ app.get('/fuel-price/india', (req, res) => {
 })
 
 app.get('/nsd', (req, res) => {
-   
+
     var time = istDate()
     if (time != nsData.time || nsData.news.length < 200) {
         getNewsByApi(req, res)
@@ -608,7 +678,7 @@ function getNewsByApi(req, res) {
     var business_url = 'https://newsapi.org/v2/top-headlines?country=in&apiKey=2fb087f1232f444a9f70f34855146fc6&category=business'
     // var business_url = 'https://newsapi.org/v2/top-headlines?country=in&apiKey=2fb087f1232f444a9f70f34855146fc6'
     axios.get(business_url).then((response) => {
-        
+
         nsData.news = response.data;
         nsData.time = istDate()
         res.send(nsData.news)
