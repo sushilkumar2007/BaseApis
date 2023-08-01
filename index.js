@@ -9,8 +9,16 @@ const axios = require('axios')
 const cheerio = require('cheerio');
 var mysql = require('mysql2');
 var csv = require('csvtojson');
+var crypto = require('crypto');
+var assert = require('assert');
+const cryptLib = require('@skavinvarnan/cryptlib');
+
+
+
+
 const app = express();
 let connectionRequest = require('./connectionRequest')
+const { isDate } = require('util/types')
 // const mysql = msq()
 
 
@@ -299,7 +307,11 @@ var bankInfo = {
     fdrates: "",
     creditcard: "",
 }
-app.get('/getbankdetails/:id', (req, res) => {
+app.get('/getbankdetails/:id/:token', (req, res) => {
+    if(!isValidToken(req.params.token)){
+        res.send("Invalid Token")
+        return
+    }
     var query = `select * from BankInfo where id=${req.params.id}`
     var connection = connectionRequest()
     connection.query(query, function (err, result, fields) {
@@ -319,7 +331,11 @@ app.get('/getbankdetails/:id', (req, res) => {
 
 })
 
-app.get('/getbanklist', (req, res) => {
+app.get('/getbanklist/:token', (req, res) => {
+    if(!isValidToken(req.params.token)){
+        res.send("Invalid Token")
+        return
+    }
     var query = "select id,name,icon,code from BankInfo";
     var connection = connectionRequest()
     connection.query(query, function (err, result, fields) {
@@ -344,7 +360,11 @@ app.get('/getbanklist', (req, res) => {
 
 
 
-app.get('/gettopbanklist', (req, res) => {
+app.get('/gettopbanklist/:token', (req, res) => {
+    if(!isValidToken(req.params.token)){
+        res.send("Invalid Token")
+        return
+    }
     var query = `select id,name,icon,code from BankInfo where isPopular=1`
 
 
@@ -368,7 +388,11 @@ app.get('/gettopbanklist', (req, res) => {
 
 })
 
-app.get('/getStateList/:bankcode', (req, res) => {
+app.get('/getStateList/:bankcode/:token', (req, res) => {
+    if(!isValidToken(req.params.token)){
+        res.send("Invalid Token")
+        return
+    }
 
     var query = `SELECT distinct state FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%'`
     var connection = connectionRequest()
@@ -391,7 +415,11 @@ app.get('/getStateList/:bankcode', (req, res) => {
 
 })
 
-app.get('/getDistrict/:bankcode/:state', (req, res) => {
+app.get('/getDistrict/:bankcode/:state/:token', (req, res) => {
+    if(!isValidToken(req.params.token)){
+        res.send("Invalid Token")
+        return
+    }
     // var query = `select distinct state from IFSC_DATA_2021 where IFSC=${req.params.bankcode}`
     var query = `SELECT distinct district FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%' and state like '%${req.params.state}%'`
     var connection = connectionRequest()
@@ -413,8 +441,11 @@ app.get('/getDistrict/:bankcode/:state', (req, res) => {
 
 })
 
-app.get('/getBranch/:state/:district/:bankcode', (req, res) => {
-
+app.get('/getBranch/:state/:district/:bankcode/:token', (req, res) => {
+    if(!isValidToken(req.params.token)){
+        res.send("Invalid Token")
+        return
+    }
     var query = `SELECT distinct branch FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%' and district like '%${req.params.district}%' and state like '%${req.params.state}%'`
     var connection = connectionRequest()
     connection.query(query, function (err, result, fields) {
@@ -435,7 +466,11 @@ app.get('/getBranch/:state/:district/:bankcode', (req, res) => {
 
 })
 
-app.get('/getifsc/:bankcode/:branch', (req, res) => {
+app.get('/getifsc/:bankcode/:branch/:token', (req, res) => {
+    if(!isValidToken(req.params.token)){
+        res.send("Invalid Token")
+        return
+    }
     // var query = `select distinct state from IFSC_DATA_2021 where IFSC=${req.params.bankcode}`
     var query = `SELECT * FROM IFSC_DATA_2020 where IFSC like '%${req.params.bankcode}%' and branch like '%${req.params.branch}%'`
     var connection = connectionRequest()
@@ -606,7 +641,11 @@ app.get('/', (req, res) => {
     res.json("Welcome Sir");
 })
 
-app.get('/fuel-price/india', (req, res) => {
+app.get('/fuel-price/india/:token', (req, res) => {
+    if(!isValidToken(req.params.token)){
+        res.send("Invalid Token")
+        return
+    }
     script(res, petrol_urls["Petrol_url"], "petrol");
 })
 
@@ -614,8 +653,12 @@ app.get('/privacy', (req, res) => {
     res.send(privacy_content)
 })
 
-app.get('/nsd', (req, res) => {
+app.get('/nsd/:token', (req, res) => {
 
+    if(!isValidToken(req.params.token)){
+        res.send("Invalid Token")
+        return
+    }
     var time = istDate()
     if (time != nsData.time || nsData.news.length < 200) {
         getNewsByApi(req, res)
@@ -624,6 +667,13 @@ app.get('/nsd', (req, res) => {
     }
 
 })
+
+function isValidToken(token){
+   if(istDate()==decryptData(token))
+     return true;
+    
+    return false;  
+}
 
 
 var dd_mm_yy = function () {
@@ -696,9 +746,57 @@ function getNewsByApi(req, res) {
 
 
 
+var algorithm = 'aes256'; // or any other algorithm supported by OpenSSL
+// var key = 'password';
+// var text = 'I love kittens';
+// var iv = "this is iv"
+
+const key = "top_bank_info"
+
+//Encrypting text
+function encryptData(data) {
+      
+     try {
+        return cryptLib.encryptPlainTextWithRandomIV(data, key)
+      } catch (exceptionVar) {
+       return ""
+      } 
+
+  }
+  
+  // Decrypt data
+function decryptData(data) {
+   
+      try {
+        return cryptLib.decryptCipherTextWithRandomIV(data, key);
+      } catch (exceptionVar) {
+       return ""
+      } 
+    
+  }
+
+
+
 app.listen(PORT, () => {
     setInterval(intervalFunc, 1500);
+   
+
+    var date = istDate()
+    // console.log("date---",date)
+    // console.log("encrpted---",encryptData(date))
+    // var encrpted = decryptData("2024-08-01")
+    // console.log("isValid---",isValidToken(encrpted))
+
+    // console.log("--decrpted",decryptData("F1eyRgoJ7YCRbpAiD1n1VS735xYj0O107LqMUTFPsaA="))
+    
     console.log(`Server  Sushil is running at PORT HELLO ${PORT}`)
+
+
+
+
+
+
+
 })
 
 var privacy_content = "<!DOCTYPE html>\n" +
