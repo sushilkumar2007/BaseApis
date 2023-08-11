@@ -796,7 +796,7 @@ const key = "top_bank_info"
 
 //Encrypting text
 function encryptData(data) {
-      
+      //
      try {
         return cryptLib.encryptPlainTextWithRandomIV(data, key)
       } catch (exceptionVar) {
