@@ -668,7 +668,7 @@ app.get('/push', (req, res) => {
 
 //Petrol Routers
 app.get('/', (req, res) => {
-    res.json("Welcome Sir");
+    res.json("Welcome Sir>>"+istDate());
 })
 
 // app.get('/fuel-price/india/:token', (req, res) => {
@@ -715,6 +715,8 @@ function isValidToken(token){
     
     return false;  
 }
+
+ var alpha = ""
 
 
 var dd_mm_yy = function () {
