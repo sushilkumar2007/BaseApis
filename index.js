@@ -668,7 +668,7 @@ app.get('/push', (req, res) => {
 
 //Petrol Routers
 app.get('/', (req, res) => {
-    res.json("Welcome ji Sir>>"+istDate());
+    res.json("Welcome To Web>>"+istDate());
 })
 
 // app.get('/fuel-price/india/:token', (req, res) => {
@@ -726,9 +726,11 @@ var dd_mm_yy = function () {
     var curr_year = d.getFullYear();
     return (curr_year + "-" + curr_month + "-" + curr_date);
 }
+process.env.TZ = "Asia/Kolkata";
+
 
 var istDate = function () {
-    var baseDate = Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })
+    var baseDate = Date()
     var d = new Date(baseDate)
     var curr_date = d.getDate();
     if (curr_date < 10) curr_date = `0${curr_date}`
