@@ -668,7 +668,7 @@ app.get('/push', (req, res) => {
 
 //Petrol Routers
 app.get('/', (req, res) => {
-    res.json("Welcome Sir>>"+istDate());
+    res.json("Welcome ji Sir>>"+istDate());
 })
 
 // app.get('/fuel-price/india/:token', (req, res) => {
