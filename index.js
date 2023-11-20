@@ -702,6 +702,9 @@ app.get('/:name/privacy', (req, res) => {
      else if(temp=='vnd'){
         change = "Video Player For All Formats"
      }
+     else if(temp=='mp'){
+        change = "Music Player"
+     }
     let bankinfo = privacy_content.replaceAll("#####",change)
     res.send(bankinfo)
 })
